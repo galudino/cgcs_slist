@@ -24,7 +24,7 @@ struct cgcs_snode {
     struct cgcs_snode *m_next;
 };
 
-#define CGCS_SNODE_INITIALIZER { ((struct cgcs_snode *)(0)), NULL }
+#define CGCS_SNODE_INITIALIZER { NULL, (struct cgcs_snode *)(0) }
 
 static void cgcs_sninit(struct cgcs_snode *self, const void *data);
 static void cgcs_sndeinit(struct cgcs_snode *self);
@@ -66,7 +66,7 @@ cgcs_snhookaft(struct cgcs_snode *self,
 static inline void
 cgcs_snunhookaft(struct cgcs_snode *self) {
     self->m_next = self->m_next->m_next;
-    // The node formerly after self (formerly self->m_next) 
+    // The node formerly after self (formerly self->m_next)
     // is now "unhooked" from the list.
     // The caller should save self->m_next prior to this code.
 }
@@ -97,7 +97,7 @@ struct cgcs_slist {
 static void cgcs_slinit(cgcs_slist *self);
 
 void cgcs_sldeinit(cgcs_slist *self);
-void cgcs_sldeinit_freefn(cgcs_slist *self, 
+void cgcs_sldeinit_freefn(cgcs_slist *self,
                           void (*freefn)(void *));
 
 static voidptr cgcs_slfront(cgcs_slist *self);
@@ -125,7 +125,7 @@ cgcs_slist_iterator cgcs_sleraseaft_freefn(cgcs_slist *self,
 
 static void cgcs_slpushf(cgcs_slist *self, const void *data);
 
-static void cgcs_slpushf_allocfn(cgcs_slist *self, 
+static void cgcs_slpushf_allocfn(cgcs_slist *self,
                                  const void *data,
                                  void *(*allocfn)(size_t));
 
@@ -190,7 +190,7 @@ cgcs_slpushf(cgcs_slist *self, const void *data) {
 }
 
 static inline void
-cgcs_slpushf_allocfn(cgcs_slist *self, 
+cgcs_slpushf_allocfn(cgcs_slist *self,
                      const void *data,
                      void *(*allocfn)(size_t)) {
     cgcs_slinsertaft_allocfn(self, cgcs_slbefbegin(self), data, allocfn);
