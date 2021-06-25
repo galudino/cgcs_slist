@@ -54,6 +54,16 @@ struct cgcs_snode *cgcs_snfind(struct cgcs_snode *x, struct cgcs_snode *y, const
     return NULL;
 }
 
+struct cgcs_snode *cgcs_snfind_b(struct cgcs_snode *x, struct cgcs_snode *y, const void *data, int (^cmp_b)(const void *, const void *)) {
+    for (struct cgcs_snode *curr = x; curr != y; curr = curr->m_next) {
+        if (cmp_b(curr->m_data, data) == 0) {
+            return curr;
+        }
+    }
+
+    return NULL;    
+}
+
 struct cgcs_snode *cgcs_snadvance(struct cgcs_snode **x, int index) {
     for (int i = 0; i < index; i++) {
         (*x) = (*x)->m_next;

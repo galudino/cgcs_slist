@@ -48,6 +48,7 @@ struct cgcs_snode *cgcs_snclearaft(struct cgcs_snode *x, struct cgcs_snode *y);
 struct cgcs_snode *cgcs_snclearaft_freefn(struct cgcs_snode *x, struct cgcs_snode *y, void (*freefn)(void *));
 
 struct cgcs_snode *cgcs_snfind(struct cgcs_snode *x, struct cgcs_snode *y, const void *data, int (*cmpfn)(const void *, const void *));
+struct cgcs_snode *cgcs_snfind_b(struct cgcs_snode *x, struct cgcs_snode *y, const void *data, int (^cmp_b)(const void *, const void *));
 struct cgcs_snode *cgcs_snadvance(struct cgcs_snode **x, int index);
 struct cgcs_snode *cgcs_sngetnode(struct cgcs_snode *x, int index);
 
@@ -107,7 +108,6 @@ cgcs_sninsertaft(struct cgcs_snode *x, const void *data) {
     cgcs_snhookaft(node, x);
     return x->m_next;
 }
-
 static inline 
 struct cgcs_snode *cgcs_sninsertaft_allocfn(struct cgcs_snode *x, const void *data, void *(*allocfn)(size_t)) {
     struct cgcs_snode *node = cgcs_snnew_allocfn(data, allocfn);
@@ -293,6 +293,7 @@ typedef struct cgcs_snode snode;
 #define snclearaft_freefn(x, y, freefn)         cgcs_snclearaft(x, y, freefn)
 
 #define snfind(x, y, data, cmpfn)               cgcs_snfind(x, y, data, cmpfn)
+#define snfind_b(x, y, data, cmp_b)             cgcs_snfind_b(x, y, data, cmp_b)
 #define snadvance(x, index)                     cgcs_snadvance(x, index)
 #define sngetnode(x, index)                     cgcs_sngetnode(x, index)
 
