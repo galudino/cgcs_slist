@@ -28,6 +28,84 @@ cgcs_snnew_allocfn(const void *data, void *(*allocfn)(size_t)) {
     return new_node;
 }
 
+struct cgcs_snode *cgcs_snclearaft(struct cgcs_snode *x, struct cgcs_snode *y) {
+    while (x->m_next != y) {
+        cgcs_sneraseaft(x);
+    }
+
+    return y;
+}
+
+struct cgcs_snode *cgcs_snclearaft_freefn(struct cgcs_snode *x, struct cgcs_snode *y, void (*freefn)(void *)) {
+    while (x->m_next != y) {
+        cgcs_sneraseaft_freefn(y, freefn);
+    }
+
+    return y;
+}
+
+struct cgcs_snode *cgcs_snfind(struct cgcs_snode *x, struct cgcs_snode *y, const void *data, int (*cmpfn)(const void *, const void *)) {
+    for (struct cgcs_snode *curr = x; curr != y; curr = curr->m_next) {
+        if (cmpfn(curr->m_data, data) == 0) {
+            return curr;
+        }
+    }
+
+    return NULL;
+}
+
+struct cgcs_snode *cgcs_snadvance(struct cgcs_snode **x, int index) {
+    for (int i = 0; i < index; i++) {
+        (*x) = (*x)->m_next;
+    }
+
+    return (*x);
+}
+
+struct cgcs_snode *cgcs_sngetnode(struct cgcs_snode *x, int index) {
+    return cgcs_snadvance(&x, index);
+}
+
+struct cgcs_snode *cgcs_sntransaft(struct cgcs_snode *x, struct cgcs_snode *start) {
+    struct cgcs_snode *finish = start->m_next;
+    while (finish && finish->m_next) {
+        finish = finish->m_next;
+    }
+
+    return cgcs_sntransaft_range(x, start, finish);
+}
+
+struct cgcs_snode *cgcs_sntransaft_range(struct cgcs_snode *x, struct cgcs_snode *start, struct cgcs_snode *finish) {
+    struct cgcs_snode *keep = start->m_next;
+
+    if (finish) {
+        start->m_next = finish->m_next;
+        finish->m_next = x->m_next;
+    } else {
+        start->m_next = NULL;
+    }
+
+    x->m_next = keep;
+    return finish;
+}
+
+void cgcs_snreverseaft(struct cgcs_snode *x) {
+    struct cgcs_snode *tail = x->m_next;
+    struct cgcs_snode *temp = NULL;
+
+    if (!tail) {
+        return;
+    }
+
+    while ((temp = tail->m_next)) {
+        struct cgcs_snode *keep = x->m_next;
+        x->m_next = temp;
+
+        tail->m_next = temp->m_next;
+        x->m_next->m_next = keep;
+    }
+}
+
 void cgcs_sldeinit(cgcs_slist *self) {
     cgcs_slist_iterator it = cgcs_slbefbegin(self);
 

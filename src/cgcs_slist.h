@@ -39,6 +39,22 @@ static void cgcs_sndelete(struct cgcs_snode *node);
 static void cgcs_sndelete_freefn(struct cgcs_snode *node,
                                      void (*freefn)(void *));
 
+static struct cgcs_snode *cgcs_sninsertaft(struct cgcs_snode *x, const void *data);
+static struct cgcs_snode *cgcs_sninsertaft_allocfn(struct cgcs_snode *x, const void *data, void *(*allocfn)(size_t));
+static struct cgcs_snode *cgcs_sneraseaft(struct cgcs_snode *x);
+static struct cgcs_snode *cgcs_sneraseaft_freefn(struct cgcs_snode *x, void (*freefn)(void *));
+
+struct cgcs_snode *cgcs_snclearaft(struct cgcs_snode *x, struct cgcs_snode *y);
+struct cgcs_snode *cgcs_snclearaft_freefn(struct cgcs_snode *x, struct cgcs_snode *y, void (*freefn)(void *));
+
+struct cgcs_snode *cgcs_snfind(struct cgcs_snode *x, struct cgcs_snode *y, const void *data, int (*cmpfn)(const void *, const void *));
+struct cgcs_snode *cgcs_snadvance(struct cgcs_snode **x, int index);
+struct cgcs_snode *cgcs_sngetnode(struct cgcs_snode *x, int index);
+
+struct cgcs_snode *cgcs_sntransaft(struct cgcs_snode *x, struct cgcs_snode *start);
+struct cgcs_snode *cgcs_sntransaft_range(struct cgcs_snode *x, struct cgcs_snode *start, struct cgcs_snode *finish);
+void cgcs_snreverseaft(struct cgcs_snode *x);
+
 static inline void
 cgcs_sninit(struct cgcs_snode *self, const void *data) {
     self->m_next = (struct cgcs_snode *)(0);
@@ -83,6 +99,48 @@ static inline void
 cgcs_sndelete_freefn(struct cgcs_snode *node, void (*freefn)(void *)) {
     cgcs_sndeinit(node);
     freefn(node);
+}
+
+static inline struct cgcs_snode *
+cgcs_sninsertaft(struct cgcs_snode *x, const void *data) {
+    struct cgcs_snode *node = cgcs_snnew(data);
+    cgcs_snhookaft(node, x);
+    return x->m_next;
+}
+
+static inline 
+struct cgcs_snode *cgcs_sninsertaft_allocfn(struct cgcs_snode *x, const void *data, void *(*allocfn)(size_t)) {
+    struct cgcs_snode *node = cgcs_snnew_allocfn(data, allocfn);
+    cgcs_snhookaft(node, x);
+    return x->m_next;
+}
+
+static inline 
+struct cgcs_snode *cgcs_sneraseaft(struct cgcs_snode *x) {
+    if (x->m_next == NULL) {
+        return NULL;
+    }
+
+    struct cgcs_snode *victim = x->m_next;
+
+    cgcs_snunhookaft(x);
+    cgcs_sndelete(victim);
+
+    return x->m_next;
+}
+
+static inline 
+struct cgcs_snode *cgcs_sneraseaft_freefn(struct cgcs_snode *x, void (*freefn)(void *)) {
+    if (x->m_next == NULL) {
+        return NULL;
+    }
+
+    struct cgcs_snode *victim = x->m_next;
+
+    cgcs_snunhookaft(x);
+    cgcs_sndelete_freefn(victim, freefn);
+
+    return x->m_next; 
 }
 
 typedef struct cgcs_slist cgcs_slist;
@@ -213,6 +271,34 @@ cgcs_slpopf_freefn(cgcs_slist *self, void (*freefn)(void *)) {
  */
 #ifdef USE_CGCS_SLIST
 # define USE_CGCS_SLIST
+
+typedef struct cgcs_snode cgcs_snode;
+typedef struct cgcs_snode snode;
+
+#define sninit(self, data)                      cgcs_sninit(self, data)
+#define sndeinit(self)                          cgcs_sndeinit(self)
+
+#define snnew(data)                             cgcs_snnew(data)
+#define snnew_allocfn(data, allocfn)            cgcs_snnew_allocfn(data, allocfn)
+
+#define sndelete(node)                          cgcs_sndelete(node)
+#define sndelete_freefn(node, freefn)           cgcs_sndelete_freefn(node, freefn)
+
+#define sninsertaft(x, data)                    cgcs_sninsertaft(x, data)
+#define sninsertaft_allocfn(x, data, allocfn)   cgcs_sninsertaft_allocfn(x, data, allocfn)
+#define sneraseaft(x)                           cgcs_sneraseaft(x)
+#define sneraseaft_freefn(x, freefn)
+
+#define snclearaft(x, y)                        cgcs_snclearaft(x, y)
+#define snclearaft_freefn(x, y, freefn)         cgcs_snclearaft(x, y, freefn)
+
+#define snfind(x, y, data, cmpfn)               cgcs_snfind(x, y, data, cmpfn)
+#define snadvance(x, index)                     cgcs_snadvance(x, index)
+#define sngetnode(x, index)                     cgcs_sngetnode(x, index)
+
+#define sntransaft(x, start) c                  cgcs_sntransaft(x, start)
+#define sntransaft_range(x, start, finish)      cgcs_sntransaft_range(x, start, finish)
+#define snreverseaft(x)                         cgcs_snreverseaft(x)
 
 typedef cgcs_slist slist;
 typedef cgcs_slist_iterator slist_iterator;

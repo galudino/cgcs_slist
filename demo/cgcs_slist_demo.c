@@ -38,6 +38,7 @@ void print_slist_strings(slist *sl);
 void deinitialize_slist_strings(slist *sl);
 void find_and_replace_string(slist *sl);
 void insert_string(slist *sl);
+void remove_part_of_list(slist *sl);
 
 int main(int argc, const char *argv[]) {
     // Sample usage of an slist of int.
@@ -63,7 +64,10 @@ int main(int argc, const char *argv[]) {
     // then insert a new string after that position.
     find_and_replace_string(&slist_strings);
     print_slist_strings(&slist_strings); 
-    
+
+    remove_part_of_list(&slist_strings);
+    print_slist_strings(&slist_strings);
+
     // Walk the list, and for each node:
     //  - free the string at that node
     //  - free the node itself.
@@ -226,9 +230,9 @@ void find_and_replace_string(slist *sl) {
         // 
 
         // Create and allocate memory for the string to insert. 
-        const char *hotel = "Hotel";
-        str = malloc(strlen(hotel) + 1);
-        strcpy(str, hotel);
+        const char *harry = "harry";
+        str = malloc(strlen(harry) + 1);
+        strcpy(str, harry);
 
         // Insert a new string into sl, after position it.
         it = slinsertaft(sl, it, &str);
@@ -236,6 +240,34 @@ void find_and_replace_string(slist *sl) {
         printf("Inserted new string: %s\n", *(char **)(it));
     } else {
         printf("[slfind]: '(failed)'\n");
+    }
+}
+
+void remove_part_of_list(slist *sl) {
+    slist_iterator it = slbefbegin(sl);
+    cgcs_snadvance(&it, 2);
+
+    slist_iterator end = it;
+    cgcs_snadvance(&end, 4);
+    // To reduce the amount of operations,
+    // we assign end to it and advance end
+    // four times.
+
+    // Since we are dealing with dynamically-allocated (char *),
+    // we want to free the (char *) at each node as we traverse
+    // the specified range.
+
+    // We are destroying nodes (2, 6), aka [3, 6)
+
+    while (it->m_next != end) {
+        // Destroy the data held at the node after it
+        free(it->m_next->m_data);
+
+        // Destroy the node after it
+        sleraseaft(sl, it);
+
+        // it->m_next will eventually meet end,
+        // provided it and end came from the same list
     }
 }
 
